@@ -4,8 +4,6 @@ from django.conf import settings
 import os
 from PIL import Image
 from django.db.models.signals import post_save
-
-
 # Create your models here.
 
 def user_directory_path_profile(instance, filename):
@@ -28,7 +26,7 @@ def user_directory_path_banner(instance, filename):
     return profile_picture_name
 
 
-VERIFICATION_OPTIONS = (
+VERIFICATION_OPTIONS=(
     ('unverified', 'unverified'),
     ('verified', 'verified'),
 )
@@ -49,8 +47,8 @@ class Profile(models.Model):
 
     date_created = models.DateField(auto_now_add=True)
 
-    # User info
-    location = models.CharField(max_length=50, null=False, blank=True)
+    #User info
+    location = models.CharField(max_length=50, null=True, blank=True)
     url = models.CharField(max_length=80, null=True, blank=True)
     birthday = models.DateField(null=True, blank=True)
     bio = models.TextField(max_length=150, null=True, blank=True)
@@ -66,7 +64,6 @@ def create_user_profile(sender, instance, created, **kwargs):
 
 def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
-
 
 # created profile
 post_save.connect(create_user_profile, sender=User)

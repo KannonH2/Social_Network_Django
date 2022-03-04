@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load tailwind_tags %}
 {% load tailwind_filters %}
 
 {% load humanize %}
@@ -34,6 +35,32 @@
     </div>
 <div class="bg-white max-w-full dark:bg-dark-second shadow px-4 py-5 sm:rounded-lg sm:p-6">
 
+        <!-- POST IMAGE -->
+        {% if post.image.count == 1 %}
+        <div class="py-2">
+            {% for img in post.image.all %}
+                <img src="{{img.image.url}}" alt="Post image">
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <!-- END POST IMAGE -->
+
+        <!-- POST MULTIPLE IMAGE -->
+        {% if post.image.count > 1 %}
+        <div class="py-2">
+            <div class="grid grid-cols-3 gap-1">
+            {% for img in post.image.all %}
+                <img src="{{ img.image.url }}" alt="Post image">
+                
+            {% endfor %}
+                
+            </div>
+        </div>
+        {% endif %}
+        <!-- END POST IMAGE -->
+         
+        
         <!-- POST AUTHOR -->
         <div class="flex items-center justify-between px-4 py-2">
             <div class="flex space-x-2 items-center">
@@ -77,10 +104,10 @@
                       x-transition:leave-end="opacity-0"  @click.away="open=false" class="z-10 origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg dark:bg-dark-third bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
                     <div class="py-1" role="none">
                     <!-- Active: "bg-gray-100 text-gray-900", Not Active: "text-gray-700" -->
-                    <a href="{% url 'social:post_edit' pk=post.pk%}" class="dark:hover:bg-dark-second dark:text-dark-txt text-gray-700 block px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-0">
+                    <a href="{% url 'social:post-edit' pk=post.pk%}" class="dark:hover:bg-dark-second dark:text-dark-txt text-gray-700 block px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-0">
                     Edit
                     </a>
-                    <a href="{% url 'social:post_delete' pk=post.pk%}" class="dark:hover:bg-dark-second dark:text-dark-txt text-gray-700 block px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-1">
+                    <a href="{% url 'social:post-delete' pk=post.pk%}" class="dark:hover:bg-dark-second dark:text-dark-txt text-gray-700 block px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-1">
                     Delete
                     </a>
                     </div>
@@ -100,31 +127,6 @@
             {{post.body}}
         </div>
         <!-- END POST CONTENT -->
-
-        <!-- POST IMAGE -->
-        {% if post.image.count == 1 %}
-        <div class="py-2">
-            {% for img in post.image.all %}
-                <img src="{{img.image.url}}" alt="Post image">
-            {% endfor %}
-        </div>
-        {% endif %}
-        
-        <!-- END POST IMAGE -->
-
-        <!-- POST MULTIPLE IMAGE -->
-        {% if post.image.count > 1 %}
-        <div class="py-2">
-            <div class="grid grid-cols-3 gap-1">
-            {% for img in post.image.all %}
-                <img src="{{ img.image.url }}" alt="Post image">
-                
-            {% endfor %}
-                
-            </div>
-        </div>
-        {% endif %}
-        <!-- END POST IMAGE -->
 
         <!-- POST REACT -->
         <div class="px-4 py-2">
@@ -254,18 +256,18 @@
 
 
         <!-- LIST COMMENT -->
-        {% comment %} <div class="py-2 px-4 max-w-full">
+        <div class="py-2 px-4 max-w-full">
             <!-- COMMENT -->
             {% for comment in comments %}
             {% if comment.is_parent %}
             <div class="flex space-x-2">
-                <a href="{% url 'profile' comment.author.username %}">
+                <a href="{% url 'users:profile' comment.author.username %}">
                 <img src="{{comment.author.profile.picture.url}}" alt="Profile picture" class="w-9 h-9 rounded-full">
                 </a>
                 <div>
                     <div class="bg-gray-100 dark:bg-dark-third p-2 rounded-2xl text-sm">
                         
-                        <a href="{% url 'profile' username=post.author.username %}" class="font-semibold block hover:text-blue-500 dark:text-dark-txt"><p>{{comment.author}}</p></a>
+                        <a href="{% url 'users:profile' username=post.author.username %}" class="font-semibold block hover:text-blue-500 dark:text-dark-txt"><p>{{comment.author}}</p></a>
                         
                         <span class="dark:text-dark-txt">{{comment.comment}}</span>
                         <span class="text-xs dark:text-dark-txt text-gray-500 float-right">{{comment.created_on | naturaltime}}</span>
@@ -326,7 +328,9 @@
                                     </div>
                                     
                                     <div class="mt-5 sm:mt-6 ">
-                                   
+                                    {% comment %} <label class="block text-sm font-medium dark:text-dark-txt text-gray-700">
+                                        Body
+                                    </label> {% endcomment %}
                                     <form method="POST" action="{% url 'social:comment-reply' post.pk comment.pk %}" class="inline-flex">
                                         {% csrf_token %}
                                         {{form.comment}}
@@ -358,12 +362,12 @@
                     <!-- REPLY COMMENT -->
                     {% for child_comment in comment.children %}
                     <div class="flex space-x-2">
-                        <a href="{% url 'profile' comment.author.username %}">
+                        <a href="{% url 'users:profile' comment.author.username %}">
                         <img src="{{child_comment.author.profile.picture.url}}" alt="Profile picture" class="w-9 h-9 rounded-full">
                         </a>
                         <div>
                             <div class="bg-gray-100 dark:bg-dark-third p-2 rounded-2xl text-sm">
-                                <a href="{% url 'profile' username=post.author.username %}" class="font-semibold block hover:text-blue-500 dark:text-dark-txt"><p>{{child_comment.author}}</p></a>
+                                <a href="{% url 'users:profile' username=post.author.username %}" class="font-semibold block hover:text-blue-500 dark:text-dark-txt"><p>{{child_comment.author}}</p></a>
                                 <span class="dark:text-dark-txt">{{child_comment.comment}}</span>
                             <span class="text-xs dark:text-dark-txt text-gray-500 float-right">{{child_comment.created_on | naturaltime}}</span>
                             </div>
@@ -406,7 +410,7 @@
             
             <!-- END COMMENT -->
 
-        </div> {% endcomment %}
+        </div>
         <!-- END LIST COMMENT -->
    
 

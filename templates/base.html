@@ -36,7 +36,7 @@
         </div>
 
         <!--main content-->
-        <div class="w-full lg:w-2/3 xl:w-2/5 pt-32 lg:pt-16 px-2">
+        <div class="w-full lg:w-23 xl:w-3/5 pt-32 lg:pt-16 px-2">
         {% include 'messages.html' %}
         {% block content %}{% endblock content %}
         </div>
@@ -46,7 +46,8 @@
         </div>
     </div>
     <!--FOOTER-->
-
+    <div class="bg-gray-100 dark:bg-dark-main fixed bottom-0 w-full p-4">
+        {% block footer %}{% endblock footer %}
     {% block javascript %}{% endblock javascript %}
 </body>
 </html>

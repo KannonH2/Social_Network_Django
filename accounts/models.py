@@ -1,9 +1,11 @@
-from django.db import models
-from django.contrib.auth.models import AbstractUser
-from django.conf import settings
 import os
-from PIL import Image
+
+from django.conf import settings
+from django.contrib.auth.models import AbstractUser
+from django.db import models
 from django.db.models.signals import post_save
+
+
 # Create your models here.
 
 def user_directory_path_profile(instance, filename):
@@ -44,6 +46,8 @@ class Profile(models.Model):
     verified = models.CharField(max_length=10, choices=VERIFICATION_OPTIONS, default='unverified')
 
     coins = models.DecimalField(max_digits=19, decimal_places=2, default=0, blank=False)
+
+    followers = models.ManyToManyField(User, related_name='followers', blank=True)
 
     date_created = models.DateField(auto_now_add=True)
 

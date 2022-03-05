@@ -29,37 +29,11 @@
         </h3>
 
         <p class="mt-1 text-sm cursor-default dark:text-dark-txt text-gray-500">
-        This is a post detail view, you can see the content, comment and share your thoughts on this topic.
-        Hint: Add a comment by clicking in the button below that says <span class="font-bold">Comment</span>
+            This is a post detail view, you can see the content, comment and share your thoughts on this topic.
+            Hint: Add a comment by clicking in the button below that says <span class="font-bold">Comment</span>
         </p>
     </div>
-<div class="bg-white max-w-full dark:bg-dark-second shadow px-4 py-5 sm:rounded-lg sm:p-6">
-
-        <!-- POST IMAGE -->
-        {% if post.image.count == 1 %}
-        <div class="py-2">
-            {% for img in post.image.all %}
-                <img src="{{img.image.url}}" alt="Post image">
-            {% endfor %}
-        </div>
-        {% endif %}
-        
-        <!-- END POST IMAGE -->
-
-        <!-- POST MULTIPLE IMAGE -->
-        {% if post.image.count > 1 %}
-        <div class="py-2">
-            <div class="grid grid-cols-3 gap-1">
-            {% for img in post.image.all %}
-                <img src="{{ img.image.url }}" alt="Post image">
-                
-            {% endfor %}
-                
-            </div>
-        </div>
-        {% endif %}
-        <!-- END POST IMAGE -->
-         
+    <div class="bg-white max-w-full dark:bg-dark-second shadow px-4 py-5 sm:rounded-lg sm:p-6">
         
         <!-- POST AUTHOR -->
         <div class="flex items-center justify-between px-4 py-2">
@@ -95,7 +69,7 @@
                     </svg>
                     </button>
                 </div>
-
+    
                 <div x-show="open" x-transition:enter="ease-out duration-300" 
                       x-transition:enter-start="opacity-0" 
                       x-transition:enter-end="opacity-100" 
@@ -115,12 +89,12 @@
             </div>
             {% endif %}
             
-
+    
         </div>
         <!-- END POST AUTHOR -->
 
-        <!-- POST CONTENT -->
-        <div class="body text-justify px-4 py-2 dark:text-dark-txt">
+         <!-- POST CONTENT -->
+         <div class="body text-justify px-4 py-2 dark:text-dark-txt">
             {% comment %} <h3 class="text-lg leading-6 font-medium dark:text-dark-txt text-gray-900">
                 {{post.title}}
             </h3> {% endcomment %}
@@ -128,6 +102,31 @@
         </div>
         <!-- END POST CONTENT -->
 
+        <!-- POST IMAGE -->
+        {% if post.image.count == 1 %}
+        <div class="py-2">
+            {% for img in post.image.all %}
+                <img alt="Post image" src="{{img.image.url}}">
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <!-- END POST IMAGE -->
+
+        <!-- POST MULTIPLE IMAGE -->
+        {% if post.image.count > 1 %}
+        <div class="py-2">
+            <div class="grid grid-cols-3 gap-1">
+            {% for img in post.image.all %}
+                <img alt="Post image" src="{{ img.image.url }}">
+                
+            {% endfor %}
+                
+            </div>
+        </div>
+        {% endif %}
+        <!-- END POST IMAGE -->
+         
         <!-- POST REACT -->
         <div class="px-4 py-2">
             <div class="flex items-center justify-between">

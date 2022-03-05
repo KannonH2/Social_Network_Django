@@ -1,30 +1,30 @@
-from social.models import Image, SocialPost, SocialComment
-from django.views.generic import TemplateView, View
-from django.shortcuts import redirect, render, get_object_or_404, redirect
-from django.core.paginator import Paginator
-from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import render
+from django.views.generic import View
 from social.forms import SocialPostForm
+from social.models import Image, SocialPost
 
 
 class HomeView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
-        logged_in_user=request.user
+        logged_in_user = request.user
 
-        posts = SocialPost.objects.all()
+        posts = SocialPost.objects.filter(author__profile__followers__in=[logged_in_user.id]).order_by('-created_on')
 
         form = SocialPostForm()
 
-        
-        context={
-            'posts':posts,
-            'form':form
+        context = {
+            'posts': posts,
+            'form': form
         }
         return render(request, 'pages/index.html', context)
 
     def post(self, request, *args, **kwargs):
-        logged_in_user=request.user
+        logged_in_user = request.user
 
-        posts = SocialPost.objects.all()
+        posts = SocialPost.objects.filter(
+            author__profile__followers__in=[logged_in_user.id]
+        ).order_by('-created_on')
 
         form = SocialPostForm(request.POST, request.FILES)
         files = request.FILES.getlist('image')
@@ -41,9 +41,8 @@ class HomeView(LoginRequiredMixin, View):
 
             new_post.save()
 
-        
-        context={
-            'posts':posts,
-            'form':form
+        context = {
+            'posts': posts,
+            'form': form
         }
         return render(request, 'pages/index.html', context)

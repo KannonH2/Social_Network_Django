@@ -2,20 +2,21 @@ from django.db import models
 from django.utils import timezone
 
 from django.contrib.auth import get_user_model
-
 User = get_user_model()
 
 
 def user_directory_path(instance, filename):
-    return 'users/socialposts/{0}'.format(filename)
-
+	return 'users/socialposts/{0}'.format(filename)
 
 # def dm_directory_path(instance, filename):
 # 	return 'users/messages/{0}'.format(filename)
 
 
 class SocialPost(models.Model):
-    body = models.TextField()
+    shared_body = models.TextField(blank=True, null=True)
+    shared_user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='+')
+    shared_on = models.DateTimeField(blank=True, null=True)
+    body=models.TextField()
     image = models.ManyToManyField('Image', blank=True)
     created_on = models.DateTimeField(default=timezone.now)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='social_post_author')

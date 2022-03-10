@@ -1,6 +1,6 @@
+from accounts.models import Profile
 from django import forms
 
-from accounts.models import Profile
 
 
 class EditProfileForm(forms.ModelForm):

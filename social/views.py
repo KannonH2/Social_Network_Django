@@ -1,11 +1,14 @@
-from social.forms import SocialCommentForm
+from social.forms import SocialCommentForm, ShareForm
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import render, redirect
 from django.urls.base import reverse_lazy
 from django.views.generic.base import View
-from .models import SocialPost, SocialComment, User
+from .models import SocialPost, SocialComment
 from django.views.generic.edit import UpdateView, DeleteView
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect
+from django.utils import timezone
+from django.db.models import Q
+from accounts.models import Profile
 
 
 class PostDetailView(LoginRequiredMixin, View):
@@ -18,7 +21,7 @@ class PostDetailView(LoginRequiredMixin, View):
         context = {
             'post': post,
             'form': form,
-            'comments':comments
+            'comments': comments
         }
 
         return render(request, 'pages/social/detail.html', context)
@@ -38,31 +41,53 @@ class PostDetailView(LoginRequiredMixin, View):
         context = {
             'post': post,
             'form': form,
-            'comments':comments
+            'comments': comments
         }
 
         return render(request, 'pages/social/detail.html', context)
 
 
+class SharedPostView(View):
+    def post(self, request, pk, *args, **kwargs):
+        original_post = SocialPost.objects.get(pk=pk)
+        form = ShareForm(request.POST)
+
+        if form.is_valid():
+            new_post = SocialPost(
+                shared_body=self.request.POST.get('body'),
+                body=original_post.body,
+                author=original_post.author,
+                created_on=original_post.created_on,
+                shared_user=request.user,
+                shared_on=timezone.now(),
+            )
+            new_post.save()
+
+            for img in original_post.image.all():
+                new_post.image.add(img)
+
+            new_post.save()
+
+        return redirect('home')
+
 
 class PostEditView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
-    model=SocialPost
-    fields=['body']
-    template_name='pages/social/edit.html'
+    model = SocialPost
+    fields = ['body']
+    template_name = 'pages/social/edit.html'
 
     def get_success_url(self):
         pk = self.kwargs['pk']
-        return reverse_lazy('social:post-detail', kwargs={'pk':pk})
+        return reverse_lazy('social:post-detail', kwargs={'pk': pk})
 
     def test_func(self):
         post = self.get_object()
         return self.request.user == post.author
 
 
-
 class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
-    model=SocialPost
-    template_name='pages/social/delete.html'
+    model = SocialPost
+    template_name = 'pages/social/delete.html'
     success_url = reverse_lazy('home')
 
     def test_func(self):
@@ -70,13 +95,12 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         return self.request.user == post.author
 
 
-
 class AddLike(LoginRequiredMixin, View):
     def post(self, request, pk, *args, **kwargs):
         post = SocialPost.objects.get(pk=pk)
 
         is_dislike = False
-        
+
         for dislike in post.dislikes.all():
             if dislike == request.user:
                 is_dislike = True
@@ -90,7 +114,7 @@ class AddLike(LoginRequiredMixin, View):
             if like == request.user:
                 is_like = True
                 break
-        
+
         if not is_like:
             post.likes.add(request.user)
 
@@ -131,7 +155,6 @@ class AddDislike(LoginRequiredMixin, View):
         return HttpResponseRedirect(next)
 
 
-
 class AddCommentLike(LoginRequiredMixin, View):
     def post(self, request, pk, *args, **kwargs):
         comment = SocialComment.objects.get(pk=pk)
@@ -150,7 +173,7 @@ class AddCommentLike(LoginRequiredMixin, View):
             if like == request.user:
                 is_like = True
                 break
-        
+
         if not is_like:
             comment.likes.add(request.user)
 
@@ -188,13 +211,13 @@ class AddCommentDislike(LoginRequiredMixin, View):
 
         next = request.POST.get('next', '/')
         return HttpResponseRedirect(next)
-        
+
 
 class CommentReplyView(LoginRequiredMixin, View):
     def post(self, request, post_pk, pk, *args, **kwargs):
-        post=SocialPost.objects.get(pk=post_pk)
+        post = SocialPost.objects.get(pk=post_pk)
         parent_comment = SocialComment.objects.get(pk=pk)
-        form=SocialCommentForm(request.POST)
+        form = SocialCommentForm(request.POST)
 
         if form.is_valid():
             new_comment = form.save(commit=False)
@@ -207,8 +230,8 @@ class CommentReplyView(LoginRequiredMixin, View):
 
 
 class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
-    model=SocialComment
-    template_name="pages/social/comment_delete.html"
+    model = SocialComment
+    template_name = "pages/social/comment_delete.html"
 
     def get_success_url(self):
         pk = self.kwargs['post_pk']
@@ -226,4 +249,15 @@ class CommentEditView(UpdateView):
 
     def get_success_url(self):
         pk = self.kwargs['post_pk']
-        return reverse_lazy('social:post-detail', kwargs={'pk':pk})
+        return reverse_lazy('social:post-detail', kwargs={'pk': pk})
+
+
+class UserSearch(View):
+    def get(self, request, *args, **kwargs):
+        query = self.request.GET.get('query')
+        profile_list = Profile.objects.filter(Q(user__username__icontains=query) | Q(user__first_name__icontains=query) | Q(user__last_name__icontains=query))
+
+        context = {
+            'profile_list': profile_list,
+        }
+        return render(request, 'pages/social/search.html', context)
